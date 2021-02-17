@@ -61,7 +61,15 @@ local make_display = function(entry)
 
   if state.show_domain_icons then
     table.insert(display_items, 2, { entry.icon, entry.icon_hl_group })
-    table.insert(display_widths, 2, { width = 4 })
+    -- table.insert(display_widths, 2, { width = 4 })
+    if not state.regenerated_displayer then
+      table.insert(display_widths, 2, { width = 4 })
+      displayer = entry_display.create {
+        items = display_widths,
+        separator = "",
+      }
+      state.regenerated_displayer = true
+    end
   end
 
   return displayer(display_items)
@@ -107,13 +115,14 @@ local function create_previewer()
       putils.job_maker({ 'elinks', '-dump', '-no-numbering', '-dump-color-mode', '1',  entry.value }, self.state.bufnr, {
       value = entry.value,
       bufname = self.state.bufname,
+      conv = true,
       })
     end
   }
 end
 -- clear current results and reset prompt
 local function reset_search(show_prompt_text)
-  state.results = show_prompt_text == nil  and {} or search_prompt_message
+  state.results = show_prompt_text == nil  and {} or state.search_prompt_message
   local new_finder = finders.new_table {
     results     = state.results,
     entry_maker = entry_maker
@@ -127,14 +136,22 @@ local function on_search_result(response, response_time, bytes)
 
   vim.fn.timer_stop(state.anim_timer)
   state.anim_timer = nil
-  state.picker:change_prompt_prefix(state.original_prompt_prefix)
+  -- state.picker:change_prompt_prefix(state.original_prompt_prefix)
 
   --update results
   local new_finder = finders.new_table {
     results     = response,
     entry_maker = entry_maker
   }
-  actions.refresh(state.picker.prompt_bufnr, new_finder)
+  -- actions.refresh(state.picker.prompt_bufnr, new_finder)
+  actions.refresh(
+    state.picker.prompt_bufnr,
+    new_finder,
+    {
+      reset_prompt = true,
+      new_prefix = state.original_prompt_prefix
+    }
+  )
 end
 
 local function do_search()
@@ -169,12 +186,12 @@ local websearch = function(opts)
 
   state.requester = require'telescope._extensions.arecibo.websearch.requester':new(selected_engine)
   -- TODO: put selected_engine.name in first column
-  local search_prompt_message = {{title=('[%s] Enter search query'):format(selected_engine.name), url='xx', idx='aa'}}
+  state.search_prompt_message = {{title=('[%s] Enter search query'):format(selected_engine.name), url='', idx=''}}
 
   state.picker = pickers.new(opts, {
     prompt_title = "Arecibo Web Search",
     finder = finders.new_table {
-      results = search_prompt_message,
+      results = state.search_prompt_message,
       entry_maker = entry_maker
     },
     previewer = create_previewer(),
@@ -193,8 +210,7 @@ end
 
 return telescope.register_extension {
   setup = function(ext_config)
-    set_config_state('show_domain_icons',         ext_config.show_domain_icons, false)
-    set_config_state('show_unindexed',      ext_config.show_unindexed, true)
+    set_config_state('show_domain_icons',         ext_config.show_domain_icons, true)
 
   end,
   exports = {
