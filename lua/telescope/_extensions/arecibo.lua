@@ -13,29 +13,32 @@ local previewers    = require'telescope.previewers'
 local putils        = require'telescope.previewers.utils'
 local sorters       = require'telescope.sorters'
 
-local arecibo_utils   = require'telescope._extensions.arecibo.websearch.utils'
-local misc            = require'telescope._extensions.arecibo.websearch.misc'
-local engines         = require'telescope._extensions.arecibo.websearch.engines'
--- local selected_engine = engines.google
+local utils         = require'telescope._extensions.arecibo.websearch.utils'
+local misc          = require'telescope._extensions.arecibo.websearch.misc'
+local engines       = require'telescope._extensions.arecibo.websearch.engines'
+
+local domain_icons        = misc.domain_icons
+local spinner_anim_frames = misc.anim_frames
+
 --
 
-local domain_icons = misc.domain_icons
-local spinner_anim_frames = misc.anim_frames
+local mode = {
+  query  = 9000,
+  result = 9001
+}
+
+local hl_group = {
+  index          = 'TelescopeAreciboNumber',
+  url            = 'TelescopeAreciboUrl',
+  prompt_default = 'TelescopePromptPrefix',
+  prompt_query   = 'TelescopeAreciboPrompt',
+}
 
 local state = {}
 
 local function set_config_state(opt_name, value, default)
   state[opt_name] = value == nil and default or value
 end
-
--- TODO: make this an init function
-local idx = 1
-for domain, style in pairs(domain_icons) do
-  arecibo_utils.highlight('Arecibo_' .. idx, {fg=style.hl})
-  domain_icons[domain].hl_idx = idx
-  idx = idx + 1
-end
-vim.cmd[[ hi! AreciboNumber guifg=#74a976]]
 
 local display_widths = {
   { width = 3 }, -- index column
@@ -48,15 +51,11 @@ local displayer = entry_display.create {
   separator = " ",
 }
 
--- local make_ordinal = function(entry)
---   return
--- end
-
 local make_display = function(entry)
   local display_items = {
-    { entry.result_idx, 'AreciboNumber' },
+    { entry.result_idx, hl_group.index },
     entry.name,
-    { entry.value, "comment" }
+    { entry.value, hl_group.url }
   }
 
   if state.show_domain_icons then
@@ -97,10 +96,9 @@ local entry_maker = function(entry)
   }
 end
 
-local current_frame = 0 -- TODO: reset this at search start and make a state.var
 local function in_progress_animation()
-  current_frame = current_frame >= #spinner_anim_frames and 1 or current_frame + 1
-  state.picker:change_prompt_prefix(spinner_anim_frames[current_frame])
+  state.current_frame = state.current_frame >= #spinner_anim_frames and 1 or state.current_frame + 1
+  state.picker:change_prompt_prefix(spinner_anim_frames[state.current_frame])
   state.picker:reset_prompt()
 end
 
@@ -119,54 +117,48 @@ local function create_previewer()
   }
 end
 
-local function set_prompt_hl(hl_group)
-  state.picker:change_prompt_prefix(
-    state.original_prompt_prefix,
-    hl_group
-  )
-end
+-- clear/set results and prompt
+local function set_finder(new_mode, results)
+  new_mode = new_mode or mode.query
+  new_mode = new_mode < 9000 and mode.query or new_mode
+  state.mode = new_mode
 
--- clear current results and reset prompt
-local function reset_search(show_prompt_text)
-  state.results = show_prompt_text == nil  and {} or state.search_prompt_message
-  local new_finder = finders.new_table {
-    results     = state.results,
-    entry_maker = entry_maker
-  }
+  results = results or {}
+  state.results = results
+  state.current_frame = 0
+
   vim.cmd[[echo]]
-  actions.refresh(
-    state.picker.prompt_bufnr,
-    new_finder,
-    {reset_prompt=true}
-  )
-  set_prompt_hl('TelescopeAreciboPrompt')
-end
 
-local function on_search_result(response)
-
-  vim.fn.timer_stop(state.anim_timer)
-  state.anim_timer = nil
-
-  --update results
   local new_finder = finders.new_table {
-    results     = response,
+    results     = results,
     entry_maker = entry_maker
   }
+
+  local prompt_text = '[Google]' .. state.original_prompt_prefix
+  local prompt_hl   = state.mode == mode.query and hl_group.prompt_query or hl_group.prompt_default
   actions.refresh(
     state.picker.prompt_bufnr,
     new_finder,
     {
-      reset_prompt = true,
-      new_prefix = state.original_prompt_prefix
+      reset_prompt=true,
+      new_prefix = { prompt_text, prompt_hl }
     }
   )
 end
 
+local function on_search_result(response)
+  vim.fn.timer_stop(state.anim_timer)
+  state.anim_timer = nil
+
+  --update results
+  set_finder(mode.result, response)
+end
+
 local function do_search()
-  local query_text = vim.fn.trim(vim.fn.getline('.'):gsub(state.original_prompt_prefix, ''))
+  local query_text = vim.fn.trim(vim.fn.getline('.'):gsub('%[Google%]'..state.original_prompt_prefix, ''))
   if query_text == '' then return end
 
-  reset_search()
+  set_finder(mode.query)
 
   -- start in-progress animation
   if not state.anim_timer then
@@ -178,8 +170,7 @@ local function do_search()
 end
 
 local function search_or_select(_)
-  local current_results = state.picker.finder.results
-  if #current_results == 1 and not current_results[1].valid then
+  if state.mode == mode.query then
     do_search()
   else
     local selection = actions.get_selected_entry()
@@ -189,48 +180,54 @@ local function search_or_select(_)
   end
 end
 
-
 local websearch = function(opts)
   opts = opts or {}
 
-  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(state.selected_engine, state.show_http_headers)
-  -- TODO: put selected_engine.name in first column
-  state.search_prompt_message = {{
-    title=('[%s] Enter search query'):format(state.selected_engine.name),
-    url='',
-    idx='',
-    valid=false
-  }}
+  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(
+    state.selected_engine,
+    state.show_http_headers
+  )
 
   state.picker = pickers.new(opts, {
     prompt_title = "Arecibo Web Search",
     finder = finders.new_table {
-      results = state.search_prompt_message,
+      results = {},
       entry_maker = entry_maker
     },
     previewer = create_previewer(),
     sorter = sorters.get_substr_matcher(opts),
     attach_mappings = function(_, map)
       actions.goto_file_selection_edit:replace(search_or_select)
-      map('i', '<C-l>', reset_search)
+      map('i', '<C-l>', set_finder)
       return true
     end
   })
-  state.original_prompt_prefix = state.picker.prompt_prefix -- TODO: only do this once
+  state.original_prompt_prefix = state.original_prompt_prefix or state.picker.prompt_prefix
   state.picker:find()
-  set_prompt_hl('TelescopeAreciboPrompt')
+  set_finder(mode.query)
 end
 
+local function setup_icon_hl_groups()
+  local idx = 1
+  for domain, style in pairs(domain_icons) do
+    utils.highlight('Arecibo_' .. idx, {fg=style.hl})
+    domain_icons[domain].hl_idx = idx
+    idx = idx + 1
+  end
+end
 
 return telescope.register_extension {
   setup = function(ext_config)
     set_config_state('selected_engine',     engines[ext_config.selected_engine], engines.google)
     set_config_state('open_command',        ext_config.url_open_command, 'xdg-open')
     set_config_state('show_domain_icons',   ext_config.show_domain_icons, false)
-    set_config_state('show_http_headers',  ext_config.show_http_headers, false)
+    set_config_state('show_http_headers',   ext_config.show_http_headers, false)
+
+    if state.show_domain_icons then
+      setup_icon_hl_groups()
+    end
   end,
   exports = {
     websearch = websearch,
   },
 }
-
