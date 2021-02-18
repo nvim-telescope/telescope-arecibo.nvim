@@ -171,7 +171,7 @@ local function search_or_select(_)
     do_search()
   else
     local selection = actions.get_selected_entry()
-    os.execute('xdg-open ' .. selection.value)
+    os.execute('xdg-open "' .. selection.value..'"')
   end
 end
 
