@@ -101,10 +101,7 @@ end
 local current_frame = 0 -- TODO: reset this at search start and make a state.var
 local function in_progress_animation()
   current_frame = current_frame >= #spinner_anim_frames and 1 or current_frame + 1
-  state.picker:change_prompt_prefix(
-    spinner_anim_frames[current_frame],
-    'Delimiter'
-  )
+  state.picker:change_prompt_prefix(spinner_anim_frames[current_frame])
   state.picker:reset_prompt()
 end
 
@@ -122,6 +119,14 @@ local function create_previewer()
     end
   }
 end
+
+local function set_prompt_hl(hl_group)
+  state.picker:change_prompt_prefix(
+    state.original_prompt_prefix,
+    hl_group
+  )
+end
+
 -- clear current results and reset prompt
 local function reset_search(show_prompt_text)
   state.results = show_prompt_text == nil  and {} or state.search_prompt_message
@@ -135,6 +140,7 @@ local function reset_search(show_prompt_text)
     new_finder,
     {reset_prompt=true}
   )
+  set_prompt_hl('TelescopeAreciboPrompt')
 end
 
 local function on_search_result(response, response_time, bytes)
@@ -154,7 +160,6 @@ local function on_search_result(response, response_time, bytes)
     {
       reset_prompt = true,
       new_prefix = state.original_prompt_prefix
-      -- new_prefix = {state.original_prompt_prefix, 'Error'}
     }
   )
 end
@@ -212,8 +217,8 @@ local websearch = function(opts)
     end
   })
   state.original_prompt_prefix = state.picker.prompt_prefix -- TODO: only do this once
-
   state.picker:find()
+  set_prompt_hl('TelescopeAreciboPrompt')
 end
 
 
