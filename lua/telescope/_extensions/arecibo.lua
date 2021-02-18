@@ -167,8 +167,7 @@ end
 
 local function search_or_select(_)
   local current_results = state.picker.finder.results
-  local result_text = current_results[1].name
-  if #current_results == 1 and vim.endswith(result_text, 'Enter search query') then -- TODO: fix me
+  if #current_results == 1 and not current_results[1].valid then
     do_search()
   else
     local selection = actions.get_selected_entry()
@@ -182,7 +181,12 @@ local websearch = function(opts)
 
   state.requester = require'telescope._extensions.arecibo.websearch.requester':new(selected_engine)
   -- TODO: put selected_engine.name in first column
-  state.search_prompt_message = {{title=('[%s] Enter search query'):format(selected_engine.name), url='', idx=''}}
+  state.search_prompt_message = {{
+    title=('[%s] Enter search query'):format(selected_engine.name),
+    url='',
+    idx='',
+    valid=false
+  }}
 
   state.picker = pickers.new(opts, {
     prompt_title = "Arecibo Web Search",
