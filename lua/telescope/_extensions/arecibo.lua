@@ -48,9 +48,9 @@ local displayer = entry_display.create {
   separator = "",
 }
 
-local make_ordinal = function(entry)
-  return
-end
+-- local make_ordinal = function(entry)
+--   return
+-- end
 
 local make_display = function(entry)
   local display_items = {
@@ -61,7 +61,6 @@ local make_display = function(entry)
 
   if state.show_domain_icons then
     table.insert(display_items, 2, { entry.icon, entry.icon_hl_group })
-    -- table.insert(display_widths, 2, { width = 4 })
     if not state.regenerated_displayer then
       table.insert(display_widths, 2, { width = 4 })
       displayer = entry_display.create {
@@ -88,7 +87,6 @@ end
 local entry_maker = function(entry)
   local domain = entry.url:match('^%w+://([^/]+)')
   domain = domain and domain:gsub('^www%.', '')
-  -- print(domain)
   return {
     display       = make_display,
     name          = entry.title,
@@ -136,14 +134,12 @@ local function on_search_result(response, response_time, bytes)
 
   vim.fn.timer_stop(state.anim_timer)
   state.anim_timer = nil
-  -- state.picker:change_prompt_prefix(state.original_prompt_prefix)
 
   --update results
   local new_finder = finders.new_table {
     results     = response,
     entry_maker = entry_maker
   }
-  -- actions.refresh(state.picker.prompt_bufnr, new_finder)
   actions.refresh(
     state.picker.prompt_bufnr,
     new_finder,
@@ -155,8 +151,8 @@ local function on_search_result(response, response_time, bytes)
 end
 
 local function do_search()
-  local query_text = vim.fn.getline('.')
-  if query_text:gsub('%s+', '') == "" then return end
+  local query_text = vim.fn.trim(vim.fn.getline('.'):gsub(state.original_prompt_prefix, ''))
+  if query_text == '' then return end
 
   reset_search()
 
@@ -171,8 +167,8 @@ end
 
 local function search_or_select(_)
   local current_results = state.picker.finder.results
-  -- if we just have the search prompt..
-  if #current_results == 1 and current_results[1].name:match('.*Enter search query$') then -- TODO: fix me
+  local result_text = current_results[1].name
+  if #current_results == 1 and vim.endswith(result_text, 'Enter search query') then -- TODO: fix me
     do_search()
   else
     local selection = actions.get_selected_entry()
@@ -210,8 +206,8 @@ end
 
 return telescope.register_extension {
   setup = function(ext_config)
-    set_config_state('show_domain_icons',         ext_config.show_domain_icons, true)
-
+    set_config_state('show_domain_icons',  ext_config.show_domain_icons, false)
+    set_config_state('show_http_messages', ext_config.show_http_messages, true)
   end,
   exports = {
     websearch = websearch,
