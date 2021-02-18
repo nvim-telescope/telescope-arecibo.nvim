@@ -98,7 +98,7 @@ end
 
 local function in_progress_animation()
   state.current_frame = state.current_frame >= #spinner_anim_frames and 1 or state.current_frame + 1
-  state.picker:change_prompt_prefix(spinner_anim_frames[state.current_frame])
+  state.picker:change_prompt_prefix(spinner_anim_frames[state.current_frame], 'TelescopeAreciboPromptProgress')
   state.picker:reset_prompt()
 end
 
@@ -155,7 +155,7 @@ local function on_search_result(response)
 end
 
 local function do_search()
-  local query_text = vim.fn.trim(vim.fn.getline('.'):gsub('%[Google%]'..state.original_prompt_prefix, ''))
+  local query_text = vim.fn.trim(vim.fn.getline('.'):gsub('%[Search%]'..state.original_prompt_prefix, ''))
   if query_text == '' then return end
 
   set_finder(mode.query)
