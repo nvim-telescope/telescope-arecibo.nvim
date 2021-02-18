@@ -192,7 +192,7 @@ end
 local websearch = function(opts)
   opts = opts or {}
 
-  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(state.selected_engine, state.show_http_messages)
+  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(state.selected_engine, state.show_http_headers)
   -- TODO: put selected_engine.name in first column
   state.search_prompt_message = {{
     title=('[%s] Enter search query'):format(state.selected_engine.name),
@@ -226,7 +226,7 @@ return telescope.register_extension {
     set_config_state('selected_engine',     engines[ext_config.selected_engine], engines.google)
     set_config_state('open_command',        ext_config.url_open_command, 'xdg-open')
     set_config_state('show_domain_icons',   ext_config.show_domain_icons, false)
-    set_config_state('show_http_messages',  ext_config.show_http_messages, false)
+    set_config_state('show_http_headers',  ext_config.show_http_headers, false)
   end,
   exports = {
     websearch = websearch,

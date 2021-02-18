@@ -28,14 +28,13 @@ local on_complete_callback = nil
 local parser = http_parser.response {
   -- on_url          = function(url)  ... end
   on_header       = function(hkey, hval)
-    -- print("HEADER: " .. hkey .. " : " .. hval)
+    log("< [" .. hkey .. "] : " .. hval)
     body = {}
     body_count = 0
    end,
-  -- on_body         = function(body) ... end
 
   on_status = function(code, msg)
-    log("HTTP status: " .. code .. ": " .. msg)
+    log("< Status : " .. code .. " - " .. msg)
   end,
   -- on_message_begin = function() print("msg_begin") end,
   on_body = function(chunk)
@@ -44,16 +43,9 @@ local parser = http_parser.response {
       if on_complete_callback then
         on_complete_callback(table.concat(body))
       end
-      -- on_complete(body)
-      -- local parser =vim.treesitter.get_string_parser(table.concat(body), "html")
-      -- print(table.concat(body))
-      -- vim.cmd("tabnew")
-      -- vim.cmd("put! " .. table.concat(body))
     end
-      -- print("... processing chunk ...")
-    -- print(vim.inspect(body))
-      body[#body+1] = chunk
-      body_count = body_count + 1
+    body[#body+1] = chunk
+    body_count = body_count + 1
     end,
 
   on_message_complete = function()
@@ -66,19 +58,6 @@ local parser = http_parser.response {
   end
   -- on_chunk_complete = function() ... end
 }
--- local my_scheduler = scheduler:init()
--- print(vim.inspect(my_scheduler))
--- local function setTimeout(delay, callback, ...)
---   print("TIMEOUT START")
---   local timer = uv.new_timer()
---   local args = {...}
---   uv.timer_start(timer, delay, 0, function ()
---     uv.timer_stop(timer)
---     uv.close(timer)
---     callback(unpack(args))
---   end)
---   return timer
--- end
 
 -- TODO: pehaps this shouldn't have an on_complete_cb and that should be in the `request` func
 -- TODO: change this to a `request` function that re-uses connection?
