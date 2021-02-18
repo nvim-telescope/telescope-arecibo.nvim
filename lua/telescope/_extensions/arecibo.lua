@@ -101,7 +101,10 @@ end
 local current_frame = 0 -- TODO: reset this at search start and make a state.var
 local function in_progress_animation()
   current_frame = current_frame >= #spinner_anim_frames and 1 or current_frame + 1
-  state.picker:change_prompt_prefix(spinner_anim_frames[current_frame])
+  state.picker:change_prompt_prefix(
+    spinner_anim_frames[current_frame]
+  )
+  state.picker:reset_prompt()
 end
 
 local function create_previewer()
@@ -126,7 +129,11 @@ local function reset_search(show_prompt_text)
     entry_maker = entry_maker
   }
   vim.cmd[[echo]]
-  actions.refresh(state.picker.prompt_bufnr, new_finder, {reset_prompt=true})
+  actions.refresh(
+    state.picker.prompt_bufnr,
+    new_finder,
+    {reset_prompt=true}
+  )
 end
 
 local function on_search_result(response, response_time, bytes)
@@ -134,6 +141,7 @@ local function on_search_result(response, response_time, bytes)
 
   vim.fn.timer_stop(state.anim_timer)
   state.anim_timer = nil
+  vim.cmd[[ hi! link TelescopePromptPrefix Identifier ]]
 
   --update results
   local new_finder = finders.new_table {
@@ -159,6 +167,7 @@ local function do_search()
   -- start in-progress animation
   if not state.anim_timer then
     state.anim_timer = vim.fn.timer_start(80, in_progress_animation, {['repeat'] = -1})
+    vim.cmd[[ hi! link TelescopePromptPrefix Delimiter ]]
   end
 
   -- perform search
@@ -171,7 +180,7 @@ local function search_or_select(_)
     do_search()
   else
     local selection = actions.get_selected_entry()
-    os.execute('xdg-open "' .. selection.value..'"')
+    os.execute(state.open_command .. ' "' .. selection.value..'"')
   end
 end
 
@@ -210,8 +219,9 @@ end
 
 return telescope.register_extension {
   setup = function(ext_config)
-    set_config_state('show_domain_icons',  ext_config.show_domain_icons, false)
-    set_config_state('show_http_messages', ext_config.show_http_messages, true)
+    set_config_state('show_domain_icons',   ext_config.show_domain_icons, false)
+    set_config_state('show_http_messages',  ext_config.show_http_messages, true)
+    set_config_state('open_command',        ext_config.url_open_command, 'xdg-open')
   end,
   exports = {
     websearch = websearch,
