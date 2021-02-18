@@ -94,8 +94,6 @@ function M:search(query_text, response_callback) -- dorequest should take a call
   end)
 
 
-  -- wait_result = vim.wait(6000, function() return self.response ~= nil end, 10, true) -- this blocks!
-
   -- TODO: response_poller should be a single instance for multiple ongoing/queue requests
   -- Note: Polling timer to avoid errors when trying to do any of this in a callback
   self.response_poller = vim.loop.new_timer()
