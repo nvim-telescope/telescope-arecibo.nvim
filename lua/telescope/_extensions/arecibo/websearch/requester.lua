@@ -3,7 +3,7 @@
 
 -- TODO: set more `var = opt.param or default` in functions
 
-local engines      = require'telescope._extensions.arecibo.websearch.engines'
+-- local engines      = require'telescope._extensions.arecibo.websearch.engines'
 local https_client = require'telescope._extensions.arecibo.websearch.http_client'
 local utils        = require'telescope._extensions.arecibo.websearch.utils'
 local treesitter   = require'telescope._extensions.arecibo.websearch.treesitter'
@@ -43,7 +43,7 @@ end
 
 local M = {}
 
-function M:new(engine)
+function M:new(engine, verbose)
   -- print(vim.inspect(engines))
   -- if not engines[engine] then
   --   print("invalid engine.")
@@ -54,7 +54,8 @@ function M:new(engine)
   setmetatable(o, self)
   self.__index = self
 
-  self.engine     = engine
+  self.engine = engine
+  self.verbose = verbose or false
 
   return o
 end
@@ -70,8 +71,6 @@ function M:search(query_text, response_callback) -- dorequest should take a call
     host           = self.engine.host,
   }
 
-  print("Connect " .. self.engine.host .. ":" .. self.engine.port)
-
   local client
   self.start_time = utils.get_time()
   client = https_client.connect {
@@ -85,7 +84,8 @@ function M:search(query_text, response_callback) -- dorequest should take a call
     end,
     on_complete = function(response)
       self.response = utils.strip_html_tags(response, {'script', 'style'})
-    end
+    end,
+    verbose = self.verbose
   }
 
   -- TODO: check connection is okay, stop timer if it isn't
@@ -109,9 +109,11 @@ function M:search(query_text, response_callback) -- dorequest should take a call
 
       local document_bytes = #self.response
       local search_results = treesitter.filter(self.response, self.engine.ts_query)
-      local duration = utils.get_time() - self.start_time
+      local response_time = utils.get_time() - self.start_time
 
-      response_callback(search_results, duration, document_bytes)
+      print(('request complete. %d bytes in %.04f seconds'):format(document_bytes, response_time))
+
+      response_callback(search_results)
     end
   end))
 end

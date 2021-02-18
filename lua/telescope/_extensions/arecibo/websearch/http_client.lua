@@ -35,7 +35,7 @@ local parser = http_parser.response {
   -- on_body         = function(body) ... end
 
   on_status = function(code, msg)
-    print("HTTP status: " .. code .. ": " .. msg)
+    log("HTTP status: " .. code .. ": " .. msg)
   end,
   -- on_message_begin = function() print("msg_begin") end,
   on_body = function(chunk)
@@ -43,8 +43,6 @@ local parser = http_parser.response {
       -- print("Response complete.")
       if on_complete_callback then
         on_complete_callback(table.concat(body))
-      else
-        print("No callback!")
       end
       -- on_complete(body)
       -- local parser =vim.treesitter.get_string_parser(table.concat(body), "html")
@@ -99,6 +97,8 @@ function Client.connect(args)
     -- options = {"all", "no_sslv2"}
   }
 
+  debug = args.verbose
+
   local ctx = assert(uv_sslctx.new_ctx(params))
 
   -- ctx:timeout(0)
@@ -116,17 +116,17 @@ function Client.connect(args)
   end
 
   function cli:onerror(err)
-    print("SOCKET ERROR" .. (err or "?"))
+    log("Socket error" .. (err or "?"))
     -- TODO: call socket:error() to get last error
   end
 
   function cli:onend()
-    print("TADA!")
+    -- print("TADA!")
     self:close()
   end
 
   function cli:onclose()
-    print("SOCKET CLOSE")
+    log("Socket closed")
   end
   -- print("Cipher: ")
   -- print(vim.inspect(ctx:on_complete_cipher()))

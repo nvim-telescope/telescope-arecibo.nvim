@@ -143,8 +143,7 @@ local function reset_search(show_prompt_text)
   set_prompt_hl('TelescopeAreciboPrompt')
 end
 
-local function on_search_result(response, response_time, bytes)
-  print(('request complete. %d bytes in %.04f seconds'):format(bytes, response_time))
+local function on_search_result(response)
 
   vim.fn.timer_stop(state.anim_timer)
   state.anim_timer = nil
@@ -193,7 +192,7 @@ end
 local websearch = function(opts)
   opts = opts or {}
 
-  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(state.selected_engine)
+  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(state.selected_engine, state.show_http_messages)
   -- TODO: put selected_engine.name in first column
   state.search_prompt_message = {{
     title=('[%s] Enter search query'):format(state.selected_engine.name),
@@ -227,8 +226,7 @@ return telescope.register_extension {
     set_config_state('selected_engine',     engines[ext_config.selected_engine], engines.google)
     set_config_state('open_command',        ext_config.url_open_command, 'xdg-open')
     set_config_state('show_domain_icons',   ext_config.show_domain_icons, false)
-    set_config_state('show_http_messages',  ext_config.show_http_messages, true)
-
+    set_config_state('show_http_messages',  ext_config.show_http_messages, false)
   end,
   exports = {
     websearch = websearch,
