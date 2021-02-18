@@ -45,7 +45,7 @@ local display_widths = {
 
 local displayer = entry_display.create {
   items = display_widths,
-  separator = "",
+  separator = " ",
 }
 
 -- local make_ordinal = function(entry)
@@ -65,7 +65,6 @@ local make_display = function(entry)
       table.insert(display_widths, 2, { width = 4 })
       displayer = entry_display.create {
         items = display_widths,
-        separator = "",
       }
       state.regenerated_displayer = true
     end
