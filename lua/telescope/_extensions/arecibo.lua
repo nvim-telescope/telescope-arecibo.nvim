@@ -134,7 +134,7 @@ local function set_finder(new_mode, results)
     entry_maker = entry_maker
   }
 
-  local prompt_text = '[Google]' .. state.original_prompt_prefix
+  local prompt_text = state.mode == mode.query  and ('[Search]' .. state.original_prompt_prefix) or '[Result]' .. state.original_prompt_prefix
   local prompt_hl   = state.mode == mode.query and hl_group.prompt_query or hl_group.prompt_default
   actions.refresh(
     state.picker.prompt_bufnr,
