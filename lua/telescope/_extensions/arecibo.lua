@@ -183,7 +183,9 @@ local function search_or_select(_)
     do_search()
   else
     local selection = actions.get_selected_entry()
-    os.execute(state.open_command .. ' "' .. selection.value..'"')
+    if selection then
+      os.execute(state.open_command .. ' "' .. selection.value..'"')
+    end
   end
 end
 
