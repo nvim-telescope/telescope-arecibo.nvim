@@ -142,7 +142,6 @@ local function on_search_result(response, response_time, bytes)
 
   vim.fn.timer_stop(state.anim_timer)
   state.anim_timer = nil
-  vim.cmd[[ hi! link TelescopePromptPrefix Identifier ]]
 
   --update results
   local new_finder = finders.new_table {
@@ -155,6 +154,7 @@ local function on_search_result(response, response_time, bytes)
     {
       reset_prompt = true,
       new_prefix = state.original_prompt_prefix
+      -- new_prefix = {state.original_prompt_prefix, 'Error'}
     }
   )
 end
@@ -168,7 +168,6 @@ local function do_search()
   -- start in-progress animation
   if not state.anim_timer then
     state.anim_timer = vim.fn.timer_start(80, in_progress_animation, {['repeat'] = -1})
-    -- vim.cmd[[ hi! link TelescopePromptPrefix Delimiter ]]
   end
 
   -- perform search
