@@ -16,7 +16,7 @@ local sorters       = require'telescope.sorters'
 local arecibo_utils   = require'telescope._extensions.arecibo.websearch.utils'
 local misc            = require'telescope._extensions.arecibo.websearch.misc'
 local engines         = require'telescope._extensions.arecibo.websearch.engines'
-local selected_engine = engines.google
+-- local selected_engine = engines.google
 --
 
 local domain_icons = misc.domain_icons
@@ -102,7 +102,8 @@ local current_frame = 0 -- TODO: reset this at search start and make a state.var
 local function in_progress_animation()
   current_frame = current_frame >= #spinner_anim_frames and 1 or current_frame + 1
   state.picker:change_prompt_prefix(
-    spinner_anim_frames[current_frame]
+    spinner_anim_frames[current_frame],
+    'Delimiter'
   )
   state.picker:reset_prompt()
 end
@@ -167,7 +168,7 @@ local function do_search()
   -- start in-progress animation
   if not state.anim_timer then
     state.anim_timer = vim.fn.timer_start(80, in_progress_animation, {['repeat'] = -1})
-    vim.cmd[[ hi! link TelescopePromptPrefix Delimiter ]]
+    -- vim.cmd[[ hi! link TelescopePromptPrefix Delimiter ]]
   end
 
   -- perform search
@@ -188,10 +189,10 @@ end
 local websearch = function(opts)
   opts = opts or {}
 
-  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(selected_engine)
+  state.requester = require'telescope._extensions.arecibo.websearch.requester':new(state.selected_engine)
   -- TODO: put selected_engine.name in first column
   state.search_prompt_message = {{
-    title=('[%s] Enter search query'):format(selected_engine.name),
+    title=('[%s] Enter search query'):format(state.selected_engine.name),
     url='',
     idx='',
     valid=false
@@ -211,17 +212,19 @@ local websearch = function(opts)
       return true
     end
   })
-
   state.original_prompt_prefix = state.picker.prompt_prefix -- TODO: only do this once
+
   state.picker:find()
 end
 
 
 return telescope.register_extension {
   setup = function(ext_config)
+    set_config_state('selected_engine',     engines[ext_config.selected_engine], engines.google)
+    set_config_state('open_command',        ext_config.url_open_command, 'xdg-open')
     set_config_state('show_domain_icons',   ext_config.show_domain_icons, false)
     set_config_state('show_http_messages',  ext_config.show_http_messages, true)
-    set_config_state('open_command',        ext_config.url_open_command, 'xdg-open')
+
   end,
   exports = {
     websearch = websearch,
