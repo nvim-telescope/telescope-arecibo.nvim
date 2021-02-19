@@ -1,4 +1,5 @@
 local ts = vim.treesitter
+local utils = require'telescope._extensions.arecibo.websearch.utils'
 
 local M = {}
 
@@ -26,7 +27,7 @@ M.filter = function(document, ts_query)
   for line in document:gmatch('[^\r\n]+') do
     table.insert(response_tbl, line)
   end
-  vim.api.nvim_buf_set_lines(scratch_bufnr, 0, #response_tbl-1, false, response_tbl)
+  vim.api.nvim_buf_set_lines(scratch_bufnr, 0, #response_tbl - 1, false, response_tbl)
 
   local results = {}
   local match_name, entry
@@ -38,8 +39,9 @@ M.filter = function(document, ts_query)
 
       entry.title = match_name == 'title' and get_node_text(response_tbl, node) or entry.title
       entry.url   = match_name == 'url'   and remove_google_amp(get_node_text(response_tbl, node)) or entry.url
-      -- entry.description = match_name == 'description' and get_node_text(document, node) or entry.description
     end
+    entry.title = utils.unescape_html(entry.title)
+
     idx = idx + 1
     entry.idx = idx
     table.insert(results, entry)
