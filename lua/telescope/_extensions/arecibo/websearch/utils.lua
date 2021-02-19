@@ -36,6 +36,21 @@ util.highlight = function(group, styles)
   vim.api.nvim_command("highlight! " .. group .. " " .. gui .. " " .. sp .. " " .. fg .. " " .. bg)
 end
 
+--
+
+local gsub = string.gsub
+local entityMap  = {["lt"]="<",["gt"]=">",["amp"]="&",["quot"]='"',["apos"]="'"}
+
+local entitySwap = function(orig,n,s)
+  return (n=='' and entityMap[s]) or
+    (n=="#" and tonumber(s)) and
+    string.char(s) or (n=="#x" and tonumber(s,16)) and string.char(tonumber(s,16)) or orig
+end
+
+util.unescape_html = function(str)
+  return (gsub( str, '(&(#?x?)([%d%a]+);)', entitySwap ))
+end
+
 return util
 
 
