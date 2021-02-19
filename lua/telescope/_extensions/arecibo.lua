@@ -83,6 +83,8 @@ local function get_domain_hl_group(domain)
 end
 
 local entry_maker = function(entry)
+  if not entry.title or not entry.url then return end -- TODO: log/fix these incomplete matches
+
   local domain = entry.url:match('^%w+://([^/]+)')
   domain = domain and domain:gsub('^www%.', '')
   return {
