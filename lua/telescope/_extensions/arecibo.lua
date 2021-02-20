@@ -177,7 +177,7 @@ local function search_or_select(_)
   else
     local selection = actions.get_selected_entry()
     if selection then
-      os.execute(state.open_command .. ' "' .. selection.value..'"' .. "&> /dev/null")
+      os.execute(state.open_command .. ' "' .. selection.value..'"' .. '&> /dev/null')
     end
   end
 end

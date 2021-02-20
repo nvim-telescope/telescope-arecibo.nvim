@@ -6,7 +6,7 @@ local M = {
 }
 
 local function decode_uri(string)
-  return string:gsub("%%3A", ":"):gsub("%%2F", "/"):gsub("%%2D", "-")
+  return string:gsub('%%3A', ':'):gsub('%%2F', '/'):gsub('%%2D', '-')
 end
 
 local function remove_google_amp(url)
@@ -69,7 +69,7 @@ M.filter.duckduckgo = function(document, ts_query)
     -- duckduckgo gave the title as bold
     -- ex. Home - <b>Neovim</b>
     -- remove the bold html tag to make parsing easier
-    local no_bold = line:gsub("</?b>", {["<b>"] = "",["</b>"] = ""})
+    local no_bold = line:gsub('</?b>', {['<b>'] = '',['</b>'] = ''})
     table.insert(response_tbl, no_bold)
   end
   vim.api.nvim_buf_set_lines(scratch_bufnr, 0, #response_tbl-1, false, response_tbl)
@@ -88,8 +88,8 @@ M.filter.duckduckgo = function(document, ts_query)
       text = get_node_text(response_tbl, node)
       match_name = query.captures[id]
 
-      entry.url   = match_name == "url" and decode_uri(text:gsub("//duckduckgo.com/l/%?uddg=", "")) or entry.url
-      entry.title = match_name == "title" and text:gsub("&amp;", "&"):gsub("&#x27;", "'") or entry.title
+      entry.url   = match_name == 'url' and decode_uri(text:gsub('//duckduckgo.com/l/%?uddg=', '')) or entry.url
+      entry.title = match_name == 'title' and text:gsub('&amp;', '&'):gsub('&#x27;', "'") or entry.title
     end
 
     idx = idx + 1
