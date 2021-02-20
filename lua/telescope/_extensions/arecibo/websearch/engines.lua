@@ -33,4 +33,30 @@ engines.google = {
 ]]
 }
 
+engines.duckduckgo = {
+  name = 'DuckDuckGo',
+  host = 'html.duckduckgo.com',
+  port = 443,
+  query_template = '/html/?q=%s',
+  ts_query =
+[[
+(element
+  (start_tag
+    (tag_name) @_parent
+    (#eq? @_parent "div"))
+  (element
+    (start_tag
+      (tag_name) @_heading)
+      (#eq? @_heading "h2")
+    (element
+      (start_tag
+        (attribute
+          (attribute_name) @_href
+          (#eq? @_href "href")
+           (quoted_attribute_value
+             (attribute_value) @url)))
+      (text) @title)))
+]]
+}
+
  return engines

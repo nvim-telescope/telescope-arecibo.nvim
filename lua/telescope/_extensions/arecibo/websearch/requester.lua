@@ -106,7 +106,7 @@ function M:search(query_text, response_callback) -- dorequest should take a call
       self.response_poller = nil
 
       local document_bytes = #self.response
-      local search_results = treesitter.filter(self.response, self.engine.ts_query)
+      local search_results = treesitter.filter[self.engine.name:lower()](self.response, self.engine.ts_query)
       local response_time = utils.get_time() - self.start_time
 
       print(('request complete. %d bytes in %0.4f seconds [%d KB/s].'):format(document_bytes, response_time, document_bytes/response_time))
