@@ -53,8 +53,8 @@ engines.duckduckgo = {
         (attribute
           (attribute_name) @_href
           (#eq? @_href "href")
-           (quoted_attribute_value
-             (attribute_value) @url)))
+          (quoted_attribute_value
+            (attribute_value) @url)))
       (text) @title)))
 ]]
 }
