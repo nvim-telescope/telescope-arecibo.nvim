@@ -138,8 +138,7 @@ local function set_finder(new_mode, results)
 
   local prompt_text = state.mode == mode.query  and ('[Search]' .. state.original_prompt_prefix) or '[Result]' .. state.original_prompt_prefix
   local prompt_hl   = state.mode == mode.query and hl_group.prompt_query or hl_group.prompt_default
-  actions.refresh(
-    state.picker.prompt_bufnr,
+  state.picker:refresh(
     new_finder,
     {
       reset_prompt=true,
@@ -199,7 +198,7 @@ local websearch = function(opts)
     previewer = create_previewer(),
     sorter = sorters.get_substr_matcher(opts),
     attach_mappings = function(_, map)
-      actions.goto_file_selection_edit:replace(search_or_select)
+      actions.select_default:replace(search_or_select)
       map('i', '<C-l>', set_finder)
       return true
     end
