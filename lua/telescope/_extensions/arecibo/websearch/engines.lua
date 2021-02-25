@@ -59,4 +59,34 @@ engines.duckduckgo = {
 ]]
 }
 
+engines.npmjs = {
+  name = 'NPMJS',
+  host = 'www.npmjs.com',
+  port = 443,
+  query_template = '/search?q=%s',
+  ts_query =
+[[
+(element
+  (start_tag
+    (tag_name) @_parent
+     (#eq? @_parent "section"))
+  (element
+    (element
+      (element
+        (start_tag
+          (tag_name) @_url-tag
+          (#eq? @_url-tag "a")
+          (attribute
+            (attribute_name) @_href-attr
+            (#eq? @_href-attr "href")
+            (quoted_attribute_value
+              (attribute_value) @url)))
+        (element
+          (start_tag
+            (tag_name) @_heading-tag
+            (#eq? @_heading-tag "h3"))
+          (text) @title )))))
+]]
+}
+
  return engines
