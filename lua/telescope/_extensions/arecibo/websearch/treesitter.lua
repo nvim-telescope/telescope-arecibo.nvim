@@ -5,8 +5,15 @@ local M = {
   filter = {}
 }
 
-local function decode_uri(string)
-  return string:gsub('%%3A', ':'):gsub('%%2F', '/'):gsub('%%2D', '-')
+-- https://github.com/luvit/luvit/blob/master/deps/querystring.lua#L36-L43
+local function decode_uri(str)
+  str = string.gsub(str, '+', ' ')
+  str = string.gsub(str, '%%(%x%x)', function(h)
+    return string.char(tonumber(h, 16))
+  end)
+  str = string.gsub(str, '\r\n', '\n')
+
+  return str
 end
 
 local function remove_google_amp(url)
