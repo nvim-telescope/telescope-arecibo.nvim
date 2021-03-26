@@ -17,11 +17,11 @@ The following engines are currently supported:
 
 TODO: guide for creating new engines.
 
-Packer Installation
+### Installation
+
+#### Packer.nvim
 
 Arecibo requires the [openssl](https://luarocks.org/modules/zhaozg/openssl) and [lua-http-parser](https://luarocks.org/modules/brimworks/lua-http-parser) lua rocks to be installed in order to retrieve HTTP results.
-
-TODO: add manual rocks installation guide
 
 ```
 use {
@@ -29,6 +29,14 @@ use {
   rocks = {"openssl", "lua-http-parser"}
 }
 ```
+
+Ensure that the TreeSitter HTML grammar is installed.
+
+```
+:TSInstall html
+```
+
+TODO: add manual rocks installation guide
 
 ### Telescope Config
 
@@ -38,10 +46,7 @@ Loading the extension:
 telescope.load_extension("arecibo")
 ```
 
-You also need the TreeSitter HTML grammar installed.
-```
-:TSInstall html
-```
+
 
 Extension options:
 
