@@ -1,9 +1,9 @@
 # telescope-arecibo.nvim
 A Neovim Telescope extension for searching the web!
 
-<video width="480" height="320" controls="controls">
-<source src="https://user-images.githubusercontent.com/1448118/112654347-964b2600-8e4f-11eb-88a8-b8de601130ab.mp4" type="video/mp4">
-</video>
+![arecibo](https://user-images.githubusercontent.com/1448118/112658122-63a32c80-8e53-11eb-9797-71eb6176493e.gif)
+
+
 
 Arecibo is a customizable plugin that can return web search results in your editor.
 It has selectable 'engines' - which are simply TreeSitter queries that are performed againt the retrived HTML document.
@@ -46,9 +46,6 @@ extensions = {
     ["url_open_command"]  = 'xdg-open'
     ["show_http_headers"] = false
     ["show_domain_icons"] = false
-
-
-
   },
 }
 ```
