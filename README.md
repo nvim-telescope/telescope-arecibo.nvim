@@ -25,7 +25,7 @@ Arecibo requires the [openssl](https://luarocks.org/modules/zhaozg/openssl) and 
 
 ```
 use {
-  "sunjon/telescope-arecibo.nvim",
+  "nvim-telescope/telescope-arecibo.nvim",
   rocks = {"openssl", "lua-http-parser"}
 }
 ```
