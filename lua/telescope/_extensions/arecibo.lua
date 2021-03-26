@@ -101,7 +101,6 @@ end
 local function in_progress_animation()
   state.current_frame = state.current_frame >= #spinner_anim_frames and 1 or state.current_frame + 1
   state.picker:change_prompt_prefix(spinner_anim_frames[state.current_frame], 'TelescopeAreciboPromptProgress')
-  state.picker:reset_prompt()
 end
 
 local function create_previewer()
