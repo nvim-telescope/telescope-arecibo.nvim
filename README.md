@@ -42,10 +42,10 @@ Extension options:
 ```
 extensions = {
   arecibo = {
-    ["selected_engine"]   = 'google'
-    ["url_open_command"]  = 'xdg-open'
-    ["show_http_headers"] = false
-    ["show_domain_icons"] = false
+    ["selected_engine"]   = 'google',
+    ["url_open_command"]  = 'xdg-open',
+    ["show_http_headers"] = false,
+    ["show_domain_icons"] = false,
   },
 }
 ```
