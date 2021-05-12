@@ -73,9 +73,8 @@ require("telescope").extensions.arecibo.websearch()
 
 ### Highlight groups:
 
-- Result Index :       `TelescopeAreciboNumber`
-- Result URL   :       `TelescopeAreciboUrl`
-- Result Mode Prompt : `TelescopePromptPrefix`
-- Query Mode Prompt  : `TelescopeAreciboPrompt`
-
-
+- Result Index :         `TelescopeAreciboNumber`
+- Result URL   :         `TelescopeAreciboUrl`
+- Result Mode Prompt :   `TelescopePromptPrefix`
+- Query Mode Prompt  :   `TelescopeAreciboPrompt`
+- Progress Mode Prompt : `TelescopeAreciboPromptProgress`
